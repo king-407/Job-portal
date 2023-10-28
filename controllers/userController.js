@@ -87,3 +87,12 @@ export const sendEMail = async (req, res, next) => {
   console.log(req.persons);
   sendMail(email, position);
 };
+export const getUser = async (req, res, next) => {
+  try {
+    const user = await userModel.find();
+    return res.status(200).send(user);
+  } catch (e) {
+    console.log(e);
+    return next("Internal server error");
+  }
+};
