@@ -19,7 +19,9 @@ const app = express();
 
 app.use(express.json());
 app.use(cors());
-
+app.get("/", (req, res, next) => {
+  return res.status(200).send("welcome");
+});
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/user", userRoute);
 app.use("/api/v1/jobs", jobsRoute);
