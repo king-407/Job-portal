@@ -10,7 +10,7 @@ const sendMail = async (email, jobId) => {
       requireTLS: true,
       auth: {
         user: "shivamtiwaritiwari0704@gmail.com",
-        pass: "nize tlva ymvu hckd",
+        pass: process.env.SMTP_PASS,
       },
     });
     const mailOptions = {
