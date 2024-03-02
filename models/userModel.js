@@ -17,22 +17,12 @@ const userSchema = new mongoose.Schema(
       unique: true,
       validate: validator.isEmail,
     },
-    applied: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Job",
-      },
-    ],
+
     isAdmin: {
       type: Boolean,
       default: false,
     },
-    recieved: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-      },
-    ],
+
     password: {
       type: String,
       required: [true, "password is require"],

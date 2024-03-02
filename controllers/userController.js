@@ -1,7 +1,7 @@
 import applicationModel from "../models/applicationModel.js";
 import userModel from "../models/userModel.js";
 import nodemailer from "nodemailer";
-const sendMail = async (email, jobId) => {
+const sendMailAccept = async (name, email, position) => {
   try {
     const transporter = nodemailer.createTransport({
       host: "smtp.gmail.com",
@@ -16,8 +16,36 @@ const sendMail = async (email, jobId) => {
     const mailOptions = {
       from: "shivamtiwaritiwari0704@gmail.com",
       to: email,
-      subject: "For verification",
-      html: "<p> Hii " + jobId + " ,Welcone ",
+      subject: `Status for your ${position}`,
+      html: `Congratulations you have forward in our job application for ${position}. Stay tuned for next steps .`,
+    };
+    transporter.sendMail(mailOptions, function (error, info) {
+      if (error) {
+        console.log(error);
+      } else {
+        console.log("mail sent successfully" + info);
+      }
+    });
+  } catch (e) {}
+};
+
+const sendMailReject = async (name, email, position) => {
+  try {
+    const transporter = nodemailer.createTransport({
+      host: "smtp.gmail.com",
+      port: 587,
+      secure: false,
+      requireTLS: true,
+      auth: {
+        user: "shivamtiwaritiwari0704@gmail.com",
+        pass: process.env.SMTP_PASS,
+      },
+    });
+    const mailOptions = {
+      from: "shivamtiwaritiwari0704@gmail.com",
+      to: email,
+      subject: `Status for your ${position}`,
+      html: `We regret to inform you that we will not move forward with your applicatio for ${position}`,
     };
     transporter.sendMail(mailOptions, function (error, info) {
       if (error) {
@@ -60,7 +88,7 @@ export const jobsApplied = async (req, res, next) => {
   try {
     const user = await applicationModel
       .find({ user: req.user.userId })
-      .populate("job", "company position status");
+      .populate("job", "company position status createdBy");
 
     return res.json(user);
   } catch (e) {
@@ -72,9 +100,12 @@ export const recievedApplication = async (req, res, next) => {
   const { jobId } = req.body;
   let users;
   try {
-    users = await applicationModel.find({ job: jobId }).populate("user");
+    users = await applicationModel
+      .find({ job: jobId })
+      .populate("user")
+      .populate("job");
+    // console.log(users[0].job.position);
 
-    req.persons = users;
     res.status(200).send(users);
 
     next();
@@ -83,9 +114,16 @@ export const recievedApplication = async (req, res, next) => {
   }
 };
 export const sendEMail = async (req, res, next) => {
-  const { email, position } = req.body;
-  console.log(req.persons);
-  sendMail(email, position);
+  const { message, jobId } = req.body;
+  const users = await applicationModel
+    .find({ job: jobId })
+    .populate("user")
+    .populate("job");
+  const name = users[0].user.name;
+  const email = users[0].user.mail;
+  const position = users[0].job.position;
+  if (message == "y") sendMailAccept(name, email, position);
+  else sendMailReject(email);
 };
 export const getUser = async (req, res, next) => {
   try {

@@ -1,13 +1,27 @@
 import jobsModel from "../models/jobsModel.js";
 import mongoose from "mongoose";
 import moment from "moment";
+import { jobsApplied } from "./userController.js";
 export const createJob = async (req, res, next) => {
-  const { company, position } = req.body;
-  if (!company || !position) {
+  const { company, position, workLocation, jobId } = req.body;
+
+  if (!company || !position || !workLocation || !jobId) {
     return next("Please provide all fields");
   }
   req.body.createdBy = req.user.userId;
+
+  const compan = await jobsModel.find({ company });
+
+  const pos = await jobsModel.find({ position });
+  const location = await jobsModel.find({ workLocation });
+  const jobid = await jobsModel.find({ jobId });
+  if (jobId) {
+    return res.status(202).send({ msg: "This job id exist" });
+  }
+  if (pos.length && location.length && compan.length)
+    return res.status(202).json({ err: "Duplicate job found" });
   const job = await jobsModel.create(req.body);
+
   return res.status(201).json(job);
 };
 export const getAllJobs = async (req, res, next) => {
@@ -21,8 +35,8 @@ export const getAllJobs = async (req, res, next) => {
   if (search) {
     objectquery.position = { $regex: search, $options: "i" };
   }
-  const jobs = await jobsModel.find(objectquery);
-
+  const jobs = await jobsModel.find();
+  console.log(jobsModel);
   res.status(200).json({
     totaljobs: jobs.length,
     jobs,
@@ -51,6 +65,19 @@ export const updateJobController = async (req, res, next) => {
   });
   //res
   res.status(200).json({ updateJob });
+};
+export const confirmDuplicate = async (req, res, next) => {
+  const { decision, company, position, workLocation, jobId } = req.body;
+  if (decision) {
+    const job = new jobsModel({
+      company,
+      position,
+      workLocation,
+      jobId,
+    });
+    await job.save();
+    return res.status(200).send(job);
+  } else return res.status(200).json({ msg: "successfully cancelled message" });
 };
 export const jobStats = async (req, res, next) => {
   let stats = await jobsModel.aggregate([

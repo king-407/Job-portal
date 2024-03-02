@@ -1,14 +1,13 @@
 import express from "express";
 import dotenv from "dotenv";
-import colors from "colors";
+
 import connectDB from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
 import cors from "cors";
 import errorM from "./middlewares/errorMiddleware.js";
 import userRoute from "./routes/userRoute.js";
 import jobsRoute from "./routes/jobsRoute.js";
-import helmet from "helmet";
-import xss from "xss-clean";
+
 dotenv.config();
 
 connectDB();

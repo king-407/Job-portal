@@ -29,6 +29,10 @@ const jobSchema = new mongoose.Schema(
       type: mongoose.Types.ObjectId,
       ref: "User",
     },
+    jobId:{
+      type:String,
+      unique:true
+    }
   },
   { timestamps: true }
 );
